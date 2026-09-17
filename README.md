@@ -28,34 +28,27 @@ Controls: **UP / DOWN** (W / S also work). SPACE to rematch. ESC to quit.
 ## Playing over the internet (Cloudflare Tunnel)
 
 The IP the host prints is their *local* IP, which only works on the same
-Wi‑Fi. The game speaks WebSocket, which Cloudflare Tunnel forwards natively,
-so the host just needs to publish port 8082 through their existing tunnel and
-the friend needs nothing extra.
+Wi-Fi. For the internet, the game is published through an existing Cloudflare
+tunnel as **pong.billy-bots.com**. The game speaks WebSocket, which the tunnel
+forwards natively, so the friend needs nothing extra.
 
-**Host, one-time tunnel setup** — add a public hostname to your tunnel:
-
-- Dashboard-managed tunnel: Zero Trust → Networks → Tunnels → your tunnel →
-  *Public Hostname* → Add: subdomain `pong`, type **HTTP**,
-  URL `localhost:8082` (or `<this PC's LAN IP>:8082` if the tunnel runs on
-  another machine).
-- Config-file tunnel: add an ingress rule above the catch-all:
-  ```yaml
-  - hostname: pong.yourdomain.com
-    service: http://localhost:8082
-  ```
-  then restart cloudflared.
+**Setup (already done):** the tunnel's public hostname `pong` is type HTTP
+with URL `http://192.168.174.133:8082` - this PC's LAN address, because the
+tunnel runs on another machine on the network. If this PC's IP ever changes,
+update that URL (or give the PC a fixed IP in the UniFi controller).
 
 **Then every time:**
 
-- Host: `python pong.py`, press ENTER.
-- Friend: `python pong.py pong.yourdomain.com`
+- Host (this PC): `python pong.py`, press ENTER.
+- Friend: `python pong.py pong.billy-bots.com`
 
 Address formats the join command accepts: an IP (`192.168.1.20`), an IP with
-port (`1.2.3.4:8082`), a hostname (`pong.yourdomain.com` → uses `wss://`), or a
-full `ws://` / `wss://` URL.
+port (`1.2.3.4:8082`), a hostname (`pong.billy-bots.com` -> uses `wss://`), or
+a full `ws://` / `wss://` URL.
 
-Other options that also work: [Tailscale](https://tailscale.com) (use the
-`100.x.y.z` IP), or forwarding TCP port 8082 on the host's router.
+Troubleshooting: if the friend sees "Could not connect", check the host has the
+game open (the tunnel only reaches the game while it's running), and that the
+tunnel rule says `http://`, not `https://`.
 
 ## How it works
 
